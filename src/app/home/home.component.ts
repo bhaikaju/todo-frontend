@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {TodoComponent} from '../todo/todo.component';
 import {ApiService} from '../services/api.service';
@@ -11,17 +11,17 @@ import {MatSelectChange} from '@angular/material/select';
 })
 export class HomeComponent implements OnInit {
   todos: any = [];
-  filteredTodos: any[] = [{title: 'Test', description: 'Test description', status: 'OPEN'}];
+  filteredTodos: any[] = [];
 
   constructor(private apiService: ApiService,
               private dialog: MatDialog) {
   }
 
   ngOnInit(): void {
-   /* this.apiService.getAllTodos().subscribe((todos) => {
+    this.apiService.getAllTodos().subscribe((todos) => {
       this.todos = todos;
       this.filteredTodos = this.todos;
-    })*/
+    });
 
   }
 
@@ -47,33 +47,34 @@ export class HomeComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(data => {
-      /*this.apiService.createTodo(data.title, data.description).subscribe((result: any) => {
+      this.apiService.createTodo(data.title, data.description).subscribe((result: any) => {
         console.log(result);
         this.todos.push(result);
         this.filteredTodos = this.todos;
-      })*/
+      });
     });
   }
 
   // tslint:disable-next-line:typedef
   statusChanged(ev: MatSelectChange, todoId: number, index: number) {
     const value = ev.value;
-    /*this.apiService.updateStatus(value, taskId).subscribe(todo => {
+    this.apiService.updateStatus(value, todoId).subscribe(todo => {
       this.todos[index] = todo;
       this.filteredTodos = this.todos;
-    });*/
+    });
   }
 
   // tslint:disable-next-line:typedef
   delete(id: number) {
     if (confirm('Do you want to remove the Todo?')) {
-      /*this.apiService.deleteTodo(id).subscribe(res => {
+      this.apiService.deleteTodo(id).subscribe(res => {
 
+        // @ts-ignore
         if (res.success) {
           this.todos = this.todos.filter((t: any) => t.id !== id);
           this.filteredTodos = this.todos;
         }
-      });*/
+      });
     }
   }
 }

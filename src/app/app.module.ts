@@ -18,6 +18,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {FormsModule} from '@angular/forms';
 import {ToastrModule} from 'ngx-toastr';
 import {MatCardModule} from '@angular/material/card';
+import {HttpClientModule} from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import {MatCardModule} from '@angular/material/card';
       closeButton: true,
       progressBar: true,
       progressAnimation: 'increasing'
-    })
+    }),
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
