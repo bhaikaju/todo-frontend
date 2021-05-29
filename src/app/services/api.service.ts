@@ -3,7 +3,7 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Router} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {tap} from 'rxjs/operators';
+import {catchError, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -16,13 +16,7 @@ export class ApiService {
   constructor(private http: HttpClient,
               private router: Router,
               private toast: ToastrService) {
-    const fetchedToken = localStorage.getItem('act');
-
-    if (fetchedToken) {
-      this.token = atob(fetchedToken);
-      this.jwtToken$.next(this.token);
-    }
-
+    this.validateJWT();
   }
 
   get jwtUserToken(): Observable<string> {
@@ -36,6 +30,10 @@ export class ApiService {
         Authorization: `Bearer ${this.token}`
       }
     });
+  }
+
+  verifyToken(token: string) {
+    return this.http.post(`${this.API_URL}/auth/verifyToken`, {token});
   }
 
   login(username: string, password: string) {
@@ -57,9 +55,22 @@ export class ApiService {
         }
       }, (err: HttpErrorResponse) => {
         this.toast.error('Authentication failed, try again', '', {
-          timeOut: 1000
+          timeOut: 1000,
+          positionClass: 'toast-top-center'
         });
       });
+  }
+
+  register(username: string, password: string) {
+
+    return this.http.post(`${this.API_URL}/auth/register`, {username, password}).pipe(
+      // @ts-ignore
+      catchError((err: HttpErrorResponse) => {
+        this.toast.error(err.error.message, '', {
+          timeOut: 1000
+        });
+      })
+    );
   }
 
 
@@ -115,4 +126,42 @@ export class ApiService {
     );
   }
 
+
+  private validateJWT() {
+    const fetchedToken = localStorage.getItem('act');
+
+    if (fetchedToken) {
+
+      try {
+        const decryptedToken = atob(fetchedToken);
+        this.verifyToken(decryptedToken).toPromise().then((res: any) => {
+          if (res.status) {
+            this.token = decryptedToken;
+            localStorage.setItem('act', btoa(this.token));
+            this.jwtToken$.next(this.token);
+          }
+        }).catch((err: HttpErrorResponse) => {
+          if (err) {
+            localStorage.removeItem('act');
+            this.token = '';
+            this.jwtToken$.next(this.token);
+          }
+        });
+      }
+        // @ts-ignore
+      catch (err: DOMException) {
+        localStorage.removeItem('act');
+        this.toast.info('Session not valid, please login again', 'Token Failure', {
+          timeOut: 2000,
+          positionClass: 'toast-top-center'
+        });
+      }
+    }
+  }
+
+
+}
+
+interface TokenResponse {
+  status: boolean;
 }
