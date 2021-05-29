@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(data => {
+      console.log(data);
       this.apiService.createTodo(data.title, data.description).subscribe((result: any) => {
         console.log(result);
         this.todos.push(result);
